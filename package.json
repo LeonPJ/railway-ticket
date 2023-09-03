@@ -4,9 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:build": "tsc -w",
-    "start:run": "nodemon ./dist/app.js",
-    "start": "concurrently npm:start:*"
+    "build": "npm i && tsc --build",
+    "build:watch": "tsc --watch",
+    "postbuild": "mv node_modules ./dist",
+    "start": "node src/app.js",
+    "start:watch": "rm -rf \"./dist/*\" && tsc-watch --onSuccess \"node -r source-map-support/register .\"",
+    "debug": "rm -rf \"./dist/*\" && tsc-watch --onSuccess \"node --inspect -r source-map-support/register .\""
   },
   "author": "",
   "license": "ISC",
@@ -20,7 +23,6 @@
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-recaptcha": "^3.6.8",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "qrcode": "^1.5.3",
     "typescript": "^5.1.6"
   },
   "devDependencies": {
