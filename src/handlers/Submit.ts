@@ -1,8 +1,6 @@
 import puppeteer from 'puppeteer-extra';
 import pluginRecaptcha from 'puppeteer-extra-plugin-recaptcha';
 import nodemailer from 'nodemailer';
-// import { Solver } from '2captcha';
-// import fs from 'fs';
 import pluginStealth from 'puppeteer-extra-plugin-stealth';
 
 puppeteer.use(pluginStealth());
