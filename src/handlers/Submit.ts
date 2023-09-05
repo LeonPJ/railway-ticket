@@ -7,6 +7,8 @@ puppeteer.use(pluginStealth());
 
 export async function Submit() {
 
+    console.log('--> Start');
+
     let browserTimeout = setTimeout(() => {
         page.close();
         console.log('browser timeout');
