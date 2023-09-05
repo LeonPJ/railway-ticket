@@ -50,9 +50,11 @@ export async function Submit() {
 
     if (!solved) {
         console.log('captchas fail');
-        return 0;
+        page.close();
+        // break;
+    } else {
+        console.log('captchas success');
     }
-    console.log('captchas success');
 
     await page.keyboard.press('Enter');
 
