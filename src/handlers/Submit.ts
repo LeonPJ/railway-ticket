@@ -5,6 +5,9 @@ import pluginStealth from 'puppeteer-extra-plugin-stealth';
 
 puppeteer.use(pluginStealth());
 
+const timeout = 120000;// 2 mins
+const retryInterval = 3600000;// 1 hr
+
 export async function Submit() {
 
     console.log('--> Start');
@@ -12,8 +15,8 @@ export async function Submit() {
     let browserTimeout = setTimeout(() => {
         page.close();
         console.log('browser timeout');
-        setInterval(Submit, 60000);
-    }, 60000);
+        setInterval(Submit, retryInterval);
+    }, timeout);
 
     puppeteer.use(pluginRecaptcha({
         provider: { id: '2captcha', token: process.env.CAPTCHA_SOLVER_TOKEN },
@@ -32,21 +35,11 @@ export async function Submit() {
     await page.waitForTimeout(100);
     /* Page 1 */
     await page.type('#pid', process.env.ID);
-    await page.type('#startStation', process.env.START_STATION);
-    await page.type('#endStation', process.env.END_STATION);
-
-    // clear value and set date
-    await page.focus('#rideDate1');
-    await page.click('#rideDate1');
-    await page.keyboard.press('ArrowRight');
-    for (let i = 0; i <= 10; i++) {
-        await page.keyboard.press('Backspace');
-    }
-    await page.waitForTimeout(100);
-    await page.type('#rideDate1', process.env.DEPARTURE_DATE);
-    await page.type('#trainNoList1', process.env.TRAIN_NUNBER);
-    await page.waitForTimeout(100);
-    await page.click('#chgSeat1');
+    await page.select('select[name="ticketOrderParamList[0].startStation"]', process.env.START_STATION);
+    await page.select('select[name="ticketOrderParamList[0].endStation"]', process.env.END_STATION);
+    await page.select('select[name="ticketOrderParamList[0].rideDate"]', process.env.DEPARTURE_DATE);
+    await page.type('#trainNo1', process.env.TRAIN_NUMBER);
+    await page.select('#chgSeat0', process.env.CHANGE_SEAT);
     const { solved } = await page.solveRecaptchas();
     // console.log(solved);
 
@@ -56,33 +49,13 @@ export async function Submit() {
         // break;
     } else {
         console.log('captchas success');
+        await page.click('#submitBtn');
     }
-
-    await page.keyboard.press('Enter');
-
-    await page.waitForTimeout(1000);
 
     /* Page 2 */
-    const [page2Submit] = await page.$x('//*[@id="order"]/div[4]/button');
-    if (page2Submit) {
-        await page2Submit.click();
-    }
-
-    /* Page 3 */
-    await page.waitForTimeout(1000);
-    await page.select('#paymentMethod', process.env.PAYMENT_METHOD!);
-
-
-    const [page3Submit] = await page.$x('//*[@id="order"]/div[4]/button[2]');
-    if (page3Submit) {
-        await page3Submit.click();
-    }
-
-    /* Page 4 */
-    await page.waitForTimeout(1000);
-    await page.waitForSelector('.code-space');
-    await page.waitForTimeout(1000);
-    let code = await page.$eval('#take-code > li > div:nth-child(4)', (result: any) => result.innerHTML);
+    await page.waitForTimeout(500);
+    await page.waitForSelector('.booking-details');
+    let code = await page.$eval('#content > div.columns.mt-2 > div > div > div.booking-title.clearfix > div > span', (result: any) => result.innerHTML);
     console.log('Get Take Code: ' + code);
     await page.close();
 
@@ -123,6 +96,6 @@ export async function Submit() {
         console.log('send e-mail success');
     } catch (error) {
         console.log('send e-mail fail');
-        setInterval(Submit, 60000);
+        setInterval(Submit, retryInterval);
     }
 }
